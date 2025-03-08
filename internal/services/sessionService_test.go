@@ -1,12 +1,8 @@
 package services_test
 
 import (
-	"context"
 	"testing"
-	"time"
-
-	"authSAS/internal/services"
-	"authSAS/internal/storages/mockups"
+	
 	"authSAS/internal/utils"
 
 	"github.com/stretchr/testify/require"
@@ -14,20 +10,16 @@ import (
 
 func TestLogin(t *testing.T) {
 
-	permStor := mockups.NewPermStorMokup()
-	tempStor := mockups.NewTempStorMokup()
-	accService := services.NewAccountService(logger, time.Minute*5, emailSender, permStor, tempStor)
-	sesService := services.NewSessionService(logger, time.Minute*5, "test", emailSender, permStor, tempStor)
-	ctx := context.Background()
+	ctx, tester := NewTester(t)
 
 	// registering email for (case 1) test
-	accService.Register(ctx, "test@mail.ru", "admin")
+	tester.accService.Register(ctx, "test@mail.ru", "admin")
 
 	// registering email with 2fa for (case 2) test
-	accService.Register(ctx, "test2@mail.ru", "admin")
-	user := permStor.UsersStorage["test2@mail.ru"]
+	tester.accService.Register(ctx, "test2@mail.ru", "admin")
+	user := tester.permStor.UsersStorage["test2@mail.ru"]
 	user.Use2FA= true
-	permStor.UsersStorage["test2@mail.ru"] = user
+	tester.permStor.UsersStorage["test2@mail.ru"] = user
 
 	cases := []struct {
 		desc string
@@ -87,7 +79,7 @@ func TestLogin(t *testing.T) {
 	}
 
 	for _, tC := range cases {
-		token, msg, err := sesService.Login(ctx, tC.inEmail, tC.inPassword)
+		token, msg, err := tester.sesService.Login(ctx, tC.inEmail, tC.inPassword)
 
 		if !tC.mustFail {
 			require.NoError(t, err)
@@ -98,7 +90,7 @@ func TestLogin(t *testing.T) {
 			} else {
 				require.Empty(t, token)
 
-				code, err := tempStor.GetTwoFACode(ctx, tC.inEmail)
+				code, err := tester.tempStor.GetTwoFACode(ctx, tC.inEmail)
 				require.NoError(t, err)
 				require.NotEmpty(t, code)
 			}
@@ -113,15 +105,11 @@ func TestLogin(t *testing.T) {
 
 func TestLogout(t *testing.T) {
 
-	permStor := mockups.NewPermStorMokup()
-	tempStor := mockups.NewTempStorMokup()
-	accService := services.NewAccountService(logger, time.Minute*5, emailSender, permStor, tempStor)
-	sesService := services.NewSessionService(logger, time.Minute*5, "test", emailSender, permStor, tempStor)
-	ctx := context.Background()
+	ctx, tester := NewTester(t)
 
 	// preparing for (case 1) test
-	accService.Register(ctx, "test@mail.ru", "admin")
-	validToken,_,_ := sesService.Login(ctx, "test@mail.ru", "admin")
+	tester.accService.Register(ctx, "test@mail.ru", "admin")
+	validToken,_,_ := tester.sesService.Login(ctx, "test@mail.ru", "admin")
 
 	cases := []struct {
 		desc string
@@ -160,7 +148,7 @@ func TestLogout(t *testing.T) {
 	}
 
 	for _, tC := range cases {
-		msg, err := sesService.Logout(ctx, tC.inToken)
+		msg, err := tester.sesService.Logout(ctx, tC.inToken)
 
 		if !tC.mustFail {
 			require.NoError(t, err)
@@ -174,15 +162,11 @@ func TestLogout(t *testing.T) {
 
 func TestLoginWith2FACode(t *testing.T) {
 
-	permStor := mockups.NewPermStorMokup()
-	tempStor := mockups.NewTempStorMokup()
-	accService := services.NewAccountService(logger, time.Minute*5, emailSender, permStor, tempStor)
-	sesService := services.NewSessionService(logger, time.Minute*5, "test", emailSender, permStor, tempStor)
-	ctx := context.Background()
+	ctx, tester := NewTester(t)
 
 	// preparing for (case 1) test
-	accService.Register(ctx, "test@mail.ru", "admin")
-	tempStor.KeepTwoFACode(ctx, "test@mail.ru", 1234)
+	tester.accService.Register(ctx, "test@mail.ru", "admin")
+	tester.tempStor.KeepTwoFACode(ctx, "test@mail.ru", 1234)
 	
 
 	cases := []struct {
@@ -230,7 +214,7 @@ func TestLoginWith2FACode(t *testing.T) {
 	}
 
 	for _, tC := range cases {
-		token, err := sesService.LoginWith2FACode(ctx, tC.inEmail, tC.inCode)
+		token, err := tester.sesService.LoginWith2FACode(ctx, tC.inEmail, tC.inCode)
 
 		if !tC.mustFail {
 			require.NoError(t, err)

@@ -1,12 +1,8 @@
 package services_test
 
 import (
-	"context"
 	"testing"
-	"time"
 
-	"authSAS/internal/services"
-	"authSAS/internal/storages/mockups"
 	"authSAS/internal/utils"
 
 	"github.com/stretchr/testify/require"
@@ -14,10 +10,7 @@ import (
 
 func TestRegister(t *testing.T) {
 
-	permStor := mockups.NewPermStorMokup()
-	tempStor := mockups.NewTempStorMokup()
-	accService := services.NewAccountService(logger, time.Minute*5, emailSender, permStor, tempStor)
-	ctx := context.Background()
+	ctx, tester := NewTester(t)
 
 	cases := []struct {
 		desc string
@@ -61,7 +54,7 @@ func TestRegister(t *testing.T) {
 	}
 
 	for _, tC := range cases {
-		userId, err := accService.Register(ctx, tC.inEmail, tC.inPassword)
+		userId, err := tester.accService.Register(ctx, tC.inEmail, tC.inPassword)
 
 		if !tC.mustFail {
 			require.NoError(t, err)
@@ -75,13 +68,10 @@ func TestRegister(t *testing.T) {
 
 func TestEmailVerifySendCode(t *testing.T) {
 
-	permStor := mockups.NewPermStorMokup()
-	tempStor := mockups.NewTempStorMokup()
-	accService := services.NewAccountService(logger, time.Minute*5, emailSender, permStor, tempStor)
-	ctx := context.Background()
+	ctx, tester := NewTester(t)
 
 	// registering email for (case 1) test
-	accService.Register(ctx, "test@mail.ru", "admin")
+	tester.accService.Register(ctx, "test@mail.ru", "admin")
 
 	cases := []struct {
 		desc string
@@ -113,13 +103,13 @@ func TestEmailVerifySendCode(t *testing.T) {
 	}
 
 	for _, tC := range cases {
-		msg, err := accService.EmailVerifySendCode(ctx, tC.inEmail)
+		msg, err := tester.accService.EmailVerifySendCode(ctx, tC.inEmail)
 
 		if !tC.mustFail {
 			require.NoError(t, err)
 			require.Equal(t, tC.outMsg, msg)
 
-			code, err := tempStor.GetEmailVerifyCode(ctx, tC.inEmail)
+			code, err := tester.tempStor.GetEmailVerifyCode(ctx, tC.inEmail)
 			require.NoError(t, err)
 			require.NotEmpty(t, code)
 
@@ -132,14 +122,11 @@ func TestEmailVerifySendCode(t *testing.T) {
 
 func TestEmailVerify(t *testing.T) {
 
-	permStor := mockups.NewPermStorMokup()
-	tempStor := mockups.NewTempStorMokup()
-	accService := services.NewAccountService(logger, time.Minute*5, emailSender, permStor, tempStor)
-	ctx := context.Background()
+	ctx, tester := NewTester(t)
 
 	// prepare for (case 1) test
-	accService.Register(ctx, "test@mail.ru", "admin")
-	tempStor.KeepEmailVerifyCode(ctx, "test@mail.ru", 1234)
+	tester.accService.Register(ctx, "test@mail.ru", "admin")
+	tester.tempStor.KeepEmailVerifyCode(ctx, "test@mail.ru", 1234)
 
 	cases := []struct {
 		desc string
@@ -191,7 +178,7 @@ func TestEmailVerify(t *testing.T) {
 	}
 
 	for _, tC := range cases {
-		msg, err := accService.EmailVerify(ctx, tC.inEmail, tC.inCode)
+		msg, err := tester.accService.EmailVerify(ctx, tC.inEmail, tC.inCode)
 
 		if !tC.mustFail {
 			require.NoError(t, err)
@@ -205,13 +192,10 @@ func TestEmailVerify(t *testing.T) {
 
 func TestPasswordRecoverSendCode(t *testing.T) {
 
-	permStor := mockups.NewPermStorMokup()
-	tempStor := mockups.NewTempStorMokup()
-	accService := services.NewAccountService(logger, time.Minute*5, emailSender, permStor, tempStor)
-	ctx := context.Background()
+	ctx, tester := NewTester(t)
 
 	// registering email for (case 1) test
-	accService.Register(ctx, "test@mail.ru", "admin")
+	tester.accService.Register(ctx, "test@mail.ru", "admin")
 
 	cases := []struct {
 		desc string
@@ -243,13 +227,13 @@ func TestPasswordRecoverSendCode(t *testing.T) {
 	}
 
 	for _, tC := range cases {
-		msg, err := accService.PasswordRecoverSendCode(ctx, tC.inEmail)
+		msg, err := tester.accService.PasswordRecoverSendCode(ctx, tC.inEmail)
 
 		if !tC.mustFail {
 			require.NoError(t, err)
 			require.Equal(t, tC.outMsg, msg)
 
-			code, err := tempStor.GetPassRecoverCode(ctx, tC.inEmail)
+			code, err := tester.tempStor.GetPassRecoverCode(ctx, tC.inEmail)
 			require.NoError(t, err)
 			require.NotEmpty(t, code)
 
@@ -262,14 +246,11 @@ func TestPasswordRecoverSendCode(t *testing.T) {
 
 func TestPasswordRecover(t *testing.T) {
 
-	permStor := mockups.NewPermStorMokup()
-	tempStor := mockups.NewTempStorMokup()
-	accService := services.NewAccountService(logger, time.Minute*5, emailSender, permStor, tempStor)
-	ctx := context.Background()
+	ctx, tester := NewTester(t)
 
 	// prepare for (case 1) test
-	accService.Register(ctx, "test@mail.ru", "admin")
-	tempStor.KeepPassRecoverCode(ctx, "test@mail.ru", 1234)
+	tester.accService.Register(ctx, "test@mail.ru", "admin")
+	tester.tempStor.KeepPassRecoverCode(ctx, "test@mail.ru", 1234)
 
 	cases := []struct {
 		desc string
@@ -336,7 +317,7 @@ func TestPasswordRecover(t *testing.T) {
 	}
 
 	for _, tC := range cases {
-		msg, err := accService.PasswordRecover(ctx, tC.inEmail, tC.inNewPassword, tC.inCode)
+		msg, err := tester.accService.PasswordRecover(ctx, tC.inEmail, tC.inNewPassword, tC.inCode)
 
 		if !tC.mustFail {
 			require.NoError(t, err)

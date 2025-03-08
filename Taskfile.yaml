@@ -1,0 +1,16 @@
+
+version: '3'
+
+tasks:
+  migrate_up:
+    aliases:
+      - mg_u
+    desc: "Migrate db up"
+    cmds:
+      - migrate -path ./migrations -database "postgres://postgres:postgres@localhost:5432/goTest?sslmode=disable" up
+  migrate_down:
+    aliases:
+      - mg_d
+    desc: "Migrate db down"
+    cmds:
+      - migrate -path ./migrations -database "postgres://postgres:postgres@localhost:5432/goTest?sslmode=disable" down 1

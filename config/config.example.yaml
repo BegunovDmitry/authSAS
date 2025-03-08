@@ -1,0 +1,19 @@
+app_mode: "test" # test, local, prod
+
+permanent_storage_path: "postgres://postgres:postgres@localhost:5432/example"
+
+jwt_token_ttl: 24h
+jwt_secret: "test"
+
+grpc:
+  domain: "127.0.0.1"
+  port: 0000
+  req_timeout: 1m
+
+temp_storage:
+  temporary_storage_path: "redis://localhost:6379/0"
+  code_ttl: 10m
+
+email_sender:
+  email: "example@example.com"
+  password: "example"

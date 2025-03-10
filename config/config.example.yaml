@@ -6,7 +6,7 @@ jwt_token_ttl: 24h
 jwt_secret: "test"
 
 grpc:
-  domain: "127.0.0.1"
+  domain: "0.0.0.0"
   port: 0000
   req_timeout: 1m
 

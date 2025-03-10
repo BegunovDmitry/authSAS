@@ -25,14 +25,15 @@ A simple authentication microservice implementing gRPC API with JWT tokens, toke
 git clone https://github.com/your_username/authSAS.git && cd authSAS
 
 # 2. Apply database migrations
-edit Taskfile.yaml, then cmd-> task mg_u
+# edit Taskfile.yaml !!!!
+task mg_u
 
 # 3. Run service
-edit ./config/config.yaml !!!!!!
+# edit ./config/config.yaml !!!!!!
 go run cmd/app/main.go --config=./config/config.yaml
 ```
 
-##⚙️ Configuration Guide ##
+## ⚙️ Configuration Guide
 ```yaml
 app_mode: "prod"  # test/local/prod
 
@@ -54,8 +55,8 @@ email_sender:
   password: "app_specific_password"
 ```
 
-##Protocol Buffers Interface##
-###Full API specification available in [authSASproto repository](https://github.com/BegunovDmitry/authSASproto)###
+## Protocol Buffers Interface
+### Full API specification available in [authSASproto repository](https://github.com/BegunovDmitry/authSASproto)
 ```protobuf
 service AuthService {
   rpc Register(RegisterRequest) returns (AuthResponse);
@@ -69,13 +70,13 @@ service AuthService {
 }
 ```
 
-##🧪 Testing Strategy##
+## 🧪 Testing Strategy
 Run unit tests for business logic:
 ```bash
 go test ./internal/services -v -cover
 ```
 
-##🐳 Docker Deployment##
+## 🐳 Docker Deployment
 ```bash
 # Build image
 docker build -t authsas:latest .
@@ -88,8 +89,8 @@ docker run -d \
   authsas:latest --config=/app/config/configprod.yaml
 ```
 
-##📂 Project Architecture##
-
+## 📂 Project Architecture
+```bash
 authSAS
 ├── cmd/               # Entry point
 ├── internal/          # Core implementation
@@ -100,3 +101,4 @@ authSAS
 │   └── utils/         # Helpers (JWT, SMTP, etc)
 ├── migrations/        # Database schema
 └── config/            # Environment configurations
+```

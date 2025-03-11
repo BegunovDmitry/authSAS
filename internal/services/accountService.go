@@ -84,13 +84,18 @@ func (a *AccountService) EmailVerifySendCode(ctx context.Context, email string) 
 		return "Error", utils.ErrInvalidCredentials
 	}
 
-	_, err = a.userGetter.GetUserByEmail(ctx, email)
+	user, err := a.userGetter.GetUserByEmail(ctx, email)
 	if err != nil {
 		a.logger.Debug("Sending email verify code user error", "email", email, "err", err.Error())
 		if err == utils.ErrUserNotFound {
 			return "Error", utils.ErrInvalidCredentials
 		}
 		return "Error", utils.ErrInternalServer
+	}
+
+	if user.IsVerified {
+		a.logger.Debug("Sending email verify code user error", "email", email, "err", utils.ErrUserEmailAlreadyVerified)
+		return "Error", utils.ErrUserEmailAlreadyVerified
 	}
 
 	randCode := utils_random.RandRange(1000, 9999)

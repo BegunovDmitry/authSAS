@@ -13,6 +13,7 @@ var (
 
 	ErrJWTAlreadyAdded = errors.New("jwt already added")
 	ErrUserAlreadyExists = errors.New("user already exists")
+	ErrUserEmailAlreadyVerified = errors.New("user's email already verified")
 
 	ErrUserNotFound = errors.New("user not found")
 	Err2FACodeNotFound = errors.New("2 factor auth code not found in temp. storage")

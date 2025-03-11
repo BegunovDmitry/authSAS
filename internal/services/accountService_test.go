@@ -72,6 +72,11 @@ func TestEmailVerifySendCode(t *testing.T) {
 
 	// registering email for (case 1) test
 	tester.accService.Register(ctx, "test@mail.ru", "admin")
+	// preparing for (case 2) test
+	tester.accService.Register(ctx, "verified@mail.ru", "admin")
+	user := tester.permStor.UsersStorage["verified@mail.ru"]
+	user.IsVerified= true
+	tester.permStor.UsersStorage["verified@mail.ru"] = user
 
 	cases := []struct {
 		desc string
@@ -87,14 +92,21 @@ func TestEmailVerifySendCode(t *testing.T) {
 			mustFail: false,
 		},
 		{
-			desc: "case 2 - sending on not registered email",
+			desc: "case 2 - try send to already verificated email",
+			inEmail: "verified@mail.ru",
+			outMsg: "Error",
+			mustFail: true,
+			fail: utils.ErrUserEmailAlreadyVerified,
+		},
+		{
+			desc: "case 3 - sending on not registered email",
 			inEmail: "123@mail.ru",
 			outMsg: "Error",
 			mustFail: true,
 			fail: utils.ErrInvalidCredentials,
 		},
 		{
-			desc: "case 3 - empty email",
+			desc: "case 4 - empty email",
 			inEmail: "",
 			outMsg: "Error",
 			mustFail: true,
@@ -152,7 +164,7 @@ func TestEmailVerify(t *testing.T) {
 			fail: utils.ErrInvalidCredentials,
 		},
 		{
-			desc: "case 2 - wrong code",
+			desc: "case 3 - wrong code",
 			inEmail: "test@mail.ru",
 			inCode: 5555,
 			outMsg: "Error",
@@ -160,7 +172,7 @@ func TestEmailVerify(t *testing.T) {
 			fail: utils.ErrInvalidCredentials,
 		},
 		{
-			desc: "case 3 - empty email",
+			desc: "case 4 - empty email",
 			inEmail: "",
 			inCode: 1234,
 			outMsg: "Error",
@@ -168,7 +180,7 @@ func TestEmailVerify(t *testing.T) {
 			fail: utils.ErrInvalidCredentials,
 		},
 		{
-			desc: "case 4 - empty code",
+			desc: "case 5 - empty code",
 			inEmail: "test@mail.ru",
 			inCode: 0,
 			outMsg: "Error",

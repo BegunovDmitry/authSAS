@@ -14,3 +14,10 @@ tasks:
     desc: "Migrate db down"
     cmds:
       - migrate -path ./migrations -database "postgres://postgres:postgres@localhost:5432/goTest?sslmode=disable" down 1
+  
+  test_services:
+    aliases:
+      - t_s
+    desc: "Run tests of main logic layer"
+    cmds:
+      - go test ./internal/services -cover

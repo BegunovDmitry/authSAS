@@ -56,7 +56,7 @@ email_sender:
 ```
 
 ## Protocol Buffers Interface
-### Full API specification available in [authSASproto repository](https://github.com/BegunovDmitry/authSASproto)
+Full API specification available in [authSASproto repository](https://github.com/BegunovDmitry/authSASproto)
 ```protobuf
 service AuthService {
   rpc Register(RegisterRequest) returns (AuthResponse);
@@ -74,6 +74,8 @@ service AuthService {
 Run unit tests for business logic:
 ```bash
 go test ./internal/services -v -cover
+#or
+task t_s
 ```
 
 ## 🐳 Docker Deployment

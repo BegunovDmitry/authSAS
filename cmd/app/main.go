@@ -79,7 +79,7 @@ func initLogger(cfg *config.Config, output io.Writer) *slog.Logger {
 	case localMode:
 		handler = slog.NewTextHandler(output, &slog.HandlerOptions{AddSource: true, Level: slog.LevelDebug})
 	case productionMode:
-		handler = slog.NewJSONHandler(output, &slog.HandlerOptions{Level: slog.LevelInfo})
+		handler = slog.NewJSONHandler(output, &slog.HandlerOptions{Level: slog.LevelDebug})
 	}
 
 	logger := slog.New(handler).With(slog.String("app_mode", cfg.AppMode))
